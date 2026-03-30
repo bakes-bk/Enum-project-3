@@ -1,0 +1,53 @@
+// Program 4: Iteration and Introspection
+// Print every enum value without hardcoding; examine what happens when
+// two constants share the same ordinal value.
+// Beyond Normal Usage: Java does NOT allow two constants to share an ordinal —
+// we demonstrate the workaround using a custom integer field, then show aliasing behavior.
+
+public class IterationIntrospection {
+
+    // Standard enum — ordinals are unique and auto-assigned (0, 1, 2...)
+    enum Color { RED, GREEN, BLUE, YELLOW }
+
+    // Enum with a custom integer field — allows "aliasing" the same number
+    // to two different names (Java won't let ordinals be the same, but custom
+    // fields can be).
+    enum Priority {
+        LOW(1), MEDIUM(5), HIGH(10), URGENT(10); // HIGH and URGENT share value 10
+
+        final int level;
+        Priority(int level) { this.level = level; }
+    }
+
+    public static void main(String[] args) {
+
+        // --- Normal Usage: built-in iteration ---
+        // values() returns all constants in declaration order — no reflection needed.
+        System.out.println("All Color values (via values()):");
+        for (Color c : Color.values()) {
+            System.out.println("  " + c.name() + " (ordinal " + c.ordinal() + ")");
+        }
+
+        // --- Introspection via reflection ---
+        // Java also supports reflection-based introspection of enum constants.
+        System.out.println("\nColor values via reflection:");
+        for (var constant : Color.class.getEnumConstants()) {
+            System.out.println("  " + constant);
+        }
+
+        // --- Beyond Normal Usage: two names, same custom integer value ---
+        // Java ordinals are always unique — you cannot assign the same ordinal
+        // to two constants. However, a custom field CAN hold the same value.
+        System.out.println("\nPriority values with custom integer field:");
+        for (Priority p : Priority.values()) {
+            System.out.printf("  %-8s ordinal=%d  level=%d%n",
+                p.name(), p.ordinal(), p.level);
+        }
+
+        // Both HIGH and URGENT exist as distinct constants — iteration lists BOTH.
+        // Java treats them as separate objects, even if their 'level' is the same.
+        System.out.println("\nAre HIGH and URGENT the same object? " + (Priority.HIGH == Priority.URGENT));
+        System.out.println("Do they have the same level? " + (Priority.HIGH.level == Priority.URGENT.level));
+        System.out.println("Conclusion: Java allows aliased custom values, but each constant is always unique.");
+    }
+}

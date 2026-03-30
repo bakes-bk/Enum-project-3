@@ -1,0 +1,51 @@
+// Program 1: Enumeration Basics
+// Demonstrates basic enum declaration, variable assignment, and printing.
+// Beyond Normal Usage: assigns an integer outside the defined enum range.
+
+public class EnumBasics {
+
+    // Basic enum declaration — Java enums are full classes under the hood.
+    // By default, each constant gets an ordinal (0, 1, 2...) but is NOT
+    // simply an integer; the type system treats it as a distinct object.
+    enum Direction {
+        NORTH, SOUTH, EAST, WEST
+    }
+
+    public static void main(String[] args) {
+
+        // --- Normal Usage ---
+        Direction d = Direction.NORTH;
+        System.out.println("Assigned direction: " + d);
+        System.out.println("Ordinal (underlying int): " + d.ordinal());
+        System.out.println("Name as string: " + d.name());
+
+        // Iterate just to show all values alongside their ordinals
+        System.out.println("\nAll Direction values:");
+        for (Direction dir : Direction.values()) {
+            System.out.println("  " + dir + " -> ordinal " + dir.ordinal());
+        }
+
+        // --- Beyond Normal Usage ---
+        // Java does NOT allow casting an arbitrary integer to an enum directly.
+        // Direction bad = (Direction) 99; // This won't even compile.
+        // The closest legal approach is Direction.values()[index], which throws
+        // ArrayIndexOutOfBoundsException at RUNTIME if the index is out of range.
+        System.out.println("\n[Beyond Normal Usage] Attempting to access ordinal 99:");
+        try {
+            Direction bad = Direction.values()[99]; // out-of-bounds index
+            System.out.println("Got: " + bad); // never reached
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println("  Runtime exception caught: " + e.getMessage());
+            System.out.println("  Java catches this at RUNTIME, not compile time.");
+        }
+
+        // valueOf() with a non-existent name throws IllegalArgumentException at runtime
+        System.out.println("\n[Beyond Normal Usage] Attempting valueOf(\"UP\"):");
+        try {
+            Direction bad2 = Direction.valueOf("UP");
+            System.out.println("Got: " + bad2);
+        } catch (IllegalArgumentException e) {
+            System.out.println("  Runtime exception caught: " + e.getMessage());
+        }
+    }
+}

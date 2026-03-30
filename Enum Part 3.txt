@@ -1,0 +1,74 @@
+// Program 3: Extended Enum Behavior
+// Java enums are full classes — each variant can carry fields and methods.
+// Beyond Normal Usage: invoke a method on a null enum variable.
+
+public class ExtendedEnumBehavior {
+
+    // Each Shape variant stores associated data and provides a method.
+    enum Shape {
+        CIRCLE(5.0),
+        RECTANGLE(3.0, 4.0),
+        TRIANGLE(6.0, 8.0, 10.0);
+
+        // Fields — each variant stores its own values
+        private final double[] dimensions;
+
+        // Constructor — called once per constant at class-load time
+        Shape(double... dims) {
+            this.dimensions = dims;
+        }
+
+        // Method attached to the enum — each variant can override it
+        public double area() {
+            return switch (this) {
+                case CIRCLE    -> Math.PI * dimensions[0] * dimensions[0];
+                case RECTANGLE -> dimensions[0] * dimensions[1];
+                case TRIANGLE  -> {
+                    // Heron's formula
+                    double a = dimensions[0], b = dimensions[1], c = dimensions[2];
+                    double s = (a + b + c) / 2;
+                    yield Math.sqrt(s * (s - a) * (s - b) * (s - c));
+                }
+            };
+        }
+
+        public String info() {
+            return name() + " -> area = " + String.format("%.2f", area());
+        }
+    }
+
+    public static void main(String[] args) {
+
+        // --- Normal Usage ---
+        System.out.println("Extended enum variants with associated data:");
+        for (Shape s : Shape.values()) {
+            System.out.println("  " + s.info());
+        }
+
+        // --- Beyond Normal Usage: null enum variable ---
+        // In Java, any object reference (including enum) can be null.
+        // Calling a method on null throws NullPointerException at RUNTIME.
+        System.out.println("\n[Beyond Normal Usage] Calling .area() on null Shape:");
+        Shape nullShape = null;
+        try {
+            double a = nullShape.area(); // NullPointerException
+            System.out.println("Area: " + a);
+        } catch (NullPointerException e) {
+            System.out.println("  NullPointerException caught at RUNTIME.");
+            System.out.println("  Java does NOT prevent null assignment to enum variables.");
+            System.out.println("  The compiler has no idea this will fail.");
+        }
+
+        // Switch on null also throws NullPointerException
+        System.out.println("\n[Beyond Normal Usage] Switch on null Shape:");
+        try {
+            String result = switch (nullShape) {
+                case CIRCLE -> "circle";
+                case RECTANGLE -> "rectangle";
+                case TRIANGLE -> "triangle";
+            };
+        } catch (NullPointerException e) {
+            System.out.println("  NullPointerException caught — switch rejects null at RUNTIME.");
+        }
+    }
+}

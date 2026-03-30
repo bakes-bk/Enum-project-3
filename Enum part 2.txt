@@ -1,0 +1,56 @@
+// Program 2: Exhaustive Control Flow
+// Demonstrates a switch statement covering every enum variant.
+// Beyond Normal Usage: shows what happens when a case is deliberately missing.
+
+public class ExhaustiveControlFlow {
+
+    enum Season { SPRING, SUMMER, FALL, WINTER }
+
+    // Returns a description for each season.
+    // Java's switch expression (Java 14+) can be exhaustive and return a value.
+    static String describe(Season s) {
+        // Switch EXPRESSION — the compiler enforces that all enum values are
+        // covered (or a default is provided). Omitting a case is a compile error.
+        return switch (s) {
+            case SPRING -> "Warm and rainy";
+            case SUMMER -> "Hot and sunny";
+            case FALL   -> "Cool and breezy";
+            case WINTER -> "Cold and snowy";
+            // If you remove any case above, the compiler refuses to compile:
+            // "the switch expression does not cover all possible input values"
+        };
+    }
+
+    // Old-style switch STATEMENT — does NOT enforce exhaustiveness.
+    // Missing cases fall through to default (or do nothing if no default exists).
+    static void describeStatement(Season s) {
+        switch (s) {
+            case SPRING: System.out.println("  Statement: Warm and rainy"); break;
+            case SUMMER: System.out.println("  Statement: Hot and sunny");  break;
+            case FALL:   System.out.println("  Statement: Cool and breezy"); break;
+            // WINTER is intentionally omitted to show the behavior
+            default:     System.out.println("  Statement: (no specific case — hit default)");
+        }
+    }
+
+    public static void main(String[] args) {
+
+        // --- Normal Usage: switch expression (exhaustive) ---
+        System.out.println("Switch EXPRESSION (exhaustive, compile-time enforced):");
+        for (Season s : Season.values()) {
+            System.out.println("  " + s + ": " + describe(s));
+        }
+
+        // --- Beyond Normal Usage: switch statement (non-exhaustive) ---
+        // WINTER has no case, so it hits default. No warning, no error at runtime.
+        System.out.println("\nSwitch STATEMENT (WINTER case missing):");
+        for (Season s : Season.values()) {
+            System.out.print("  " + s + ": ");
+            describeStatement(s);
+        }
+
+        System.out.println("\nConclusion:");
+        System.out.println("  Switch EXPRESSION: missing case = compile-time error.");
+        System.out.println("  Switch STATEMENT:  missing case = silent fallthrough to default (runtime only).");
+    }
+}

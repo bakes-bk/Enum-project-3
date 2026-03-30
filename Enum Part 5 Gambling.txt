@@ -1,0 +1,103 @@
+// Program 5: Applied Enumeration — Card Game
+// A small card game where Suit and Rank enums drive all game logic.
+// Enums carry data and methods; removing them would require significant redesign.
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class AppliedEnumeration {
+
+    // --- Suit enum: carries a display symbol and trump priority ---
+    enum Suit {
+        CLUBS("♣", 1), DIAMONDS("♦", 2), HEARTS("♥", 3), SPADES("♠", 4);
+
+        final String symbol;
+        final int trumpOrder; // higher = stronger trump suit
+
+        Suit(String symbol, int trumpOrder) {
+            this.symbol = symbol;
+            this.trumpOrder = trumpOrder;
+        }
+
+        boolean isRed()  { return this == HEARTS || this == DIAMONDS; }
+        boolean isBlack() { return this == CLUBS || this == SPADES; }
+    }
+
+    // --- Rank enum: carries point value used in scoring ---
+    enum Rank {
+        TWO(2,2), THREE(3,3), FOUR(4,4), FIVE(5,5), SIX(6,6),
+        SEVEN(7,7), EIGHT(8,8), NINE(9,9), TEN(10,10),
+        JACK(11,10), QUEEN(12,10), KING(13,10), ACE(14,11);
+
+        final int order;      // used for comparing ranks
+        final int pointValue; // used for scoring
+
+        Rank(int order, int pointValue) {
+            this.order = order;
+            this.pointValue = pointValue;
+        }
+    }
+
+    // --- Card: a simple pairing of Rank + Suit ---
+    record Card(Rank rank, Suit suit) {
+        @Override public String toString() {
+            return rank.name() + suit.symbol;
+        }
+
+        int pointValue()  { return rank.pointValue; }
+
+        // Beats another card: higher rank wins; if tied, higher trump suit wins
+        boolean beats(Card other) {
+            if (this.rank.order != other.rank.order)
+                return this.rank.order > other.rank.order;
+            return this.suit.trumpOrder > other.suit.trumpOrder;
+        }
+    }
+
+    // --- Deck: built entirely from Suit and Rank enum values ---
+    static List<Card> buildDeck() {
+        List<Card> deck = new ArrayList<>();
+        for (Suit suit : Suit.values()) {
+            for (Rank rank : Rank.values()) {
+                deck.add(new Card(rank, suit));
+            }
+        }
+        Collections.shuffle(deck);
+        return deck;
+    }
+
+    public static void main(String[] args) {
+        List<Card> deck = buildDeck();
+        System.out.println("Deck size: " + deck.size() + " cards\n");
+
+        // Deal 5 cards to two players
+        List<Card> handA = deck.subList(0, 5);
+        List<Card> handB = deck.subList(5, 10);
+
+        System.out.println("Player A hand: " + handA);
+        System.out.println("Player B hand: " + handB);
+
+        // Score each hand
+        int scoreA = handA.stream().mapToInt(Card::pointValue).sum();
+        int scoreB = handB.stream().mapToInt(Card::pointValue).sum();
+        System.out.println("\nPlayer A score: " + scoreA);
+        System.out.println("Player B score: " + scoreB);
+        System.out.println("Winner: Player " + (scoreA >= scoreB ? "A" : "B"));
+
+        // Show trump analysis using Suit enum methods
+        System.out.println("\nSuit color analysis:");
+        for (Suit s : Suit.values()) {
+            System.out.printf("  %s %-9s red=%-5b black=%-5b trump-order=%d%n",
+                s.symbol, s.name(), s.isRed(), s.isBlack(), s.trumpOrder);
+        }
+
+        // Head-to-head: top card from each hand
+        Card topA = handA.stream().max((a, b) -> a.rank.order - b.rank.order).get();
+        Card topB = handB.stream().max((a, b) -> a.rank.order - b.rank.order).get();
+        System.out.println("\nHead-to-head — best card:");
+        System.out.println("  Player A plays: " + topA);
+        System.out.println("  Player B plays: " + topB);
+        System.out.println("  " + (topA.beats(topB) ? "Player A" : "Player B") + " wins the trick!");
+    }
+}
