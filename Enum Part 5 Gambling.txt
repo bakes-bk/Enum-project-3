@@ -98,6 +98,6 @@ public class AppliedEnumeration {
         System.out.println("\nHead-to-head — best card:");
         System.out.println("  Player A plays: " + topA);
         System.out.println("  Player B plays: " + topB);
-        System.out.println("  " + (topA.beats(topB) ? "Player A" : "Player B") + " wins the trick!");
+        System.out.println("  " + (topA.beats(topB) ? "Player A" : "Player B") + " wins the hand!");
     }
 }
